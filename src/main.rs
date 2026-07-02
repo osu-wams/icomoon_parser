@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::collections::BTreeMap;
 use std::env;
 use std::error::Error;
 use std::fs::File;
@@ -24,15 +25,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Parsing icons…");
 
-    for cap in re.captures_iter(&css_text) {
-        let class_name = &cap[1];
-        let hex_code = &cap[2];
+    let code_points: BTreeMap<String, String> = re
+        .captures_iter(&css_text)
+        .map(|cap| (cap[1].to_string(), cap[2].to_string()))
+        .collect();
 
-        writeln!(file, "{} {}", class_name, hex_code)?;
+    for (class, hex) in &code_points {
+        writeln!(file, "{class} {hex}")?;
         count += 1;
     }
 
-    println!("Successfully wrote {} icons to osu.codepoints", count);
+    println!("Successfully wrote {} icons to osu_icons.codepoints", count);
 
     Ok(())
 }
